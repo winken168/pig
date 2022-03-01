@@ -15,15 +15,14 @@
  */
 package com.pig4cloud.pig.admin.api.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.pig4cloud.pig.common.mybatis.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.time.LocalDateTime;
 
 /**
  * 字典项
@@ -34,22 +33,22 @@ import java.time.LocalDateTime;
 @Data
 @ApiModel(value = "字典项")
 @EqualsAndHashCode(callSuper = true)
-public class SysDictItem extends Model<SysDictItem> {
+public class SysDictItem extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 编号
 	 */
-	@TableId
+	@TableId(type = IdType.ASSIGN_ID)
 	@ApiModelProperty(value = "字典项id")
-	private Integer id;
+	private Long id;
 
 	/**
 	 * 所属字典类id
 	 */
 	@ApiModelProperty(value = "所属字典类id")
-	private Integer dictId;
+	private Long dictId;
 
 	/**
 	 * 数据值
@@ -79,25 +78,13 @@ public class SysDictItem extends Model<SysDictItem> {
 	 * 排序（升序）
 	 */
 	@ApiModelProperty(value = "排序值，默认升序")
-	private Integer sort;
-
-	/**
-	 * 创建时间
-	 */
-	@ApiModelProperty(value = "创建时间")
-	private LocalDateTime createTime;
-
-	/**
-	 * 更新时间
-	 */
-	@ApiModelProperty(value = "更新时间")
-	private LocalDateTime updateTime;
+	private Integer sortOrder;
 
 	/**
 	 * 备注信息
 	 */
 	@ApiModelProperty(value = "备注信息")
-	private String remarks;
+	private String remark;
 
 	/**
 	 * 删除标记

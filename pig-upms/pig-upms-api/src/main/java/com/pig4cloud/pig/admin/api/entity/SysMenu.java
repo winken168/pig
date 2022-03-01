@@ -19,14 +19,13 @@ package com.pig4cloud.pig.admin.api.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.pig4cloud.pig.common.mybatis.base.BaseEntity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -38,16 +37,16 @@ import java.time.LocalDateTime;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SysMenu extends Model<SysMenu> {
+public class SysMenu extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 菜单ID
 	 */
-	@TableId(value = "menu_id", type = IdType.AUTO)
+	@TableId(value = "menu_id", type = IdType.ASSIGN_ID)
 	@ApiModelProperty(value = "菜单id")
-	private Integer menuId;
+	private Long menuId;
 
 	/**
 	 * 菜单名称
@@ -67,7 +66,7 @@ public class SysMenu extends Model<SysMenu> {
 	 */
 	@NotNull(message = "菜单父ID不能为空")
 	@ApiModelProperty(value = "菜单父id")
-	private Integer parentId;
+	private Long parentId;
 
 	/**
 	 * 图标
@@ -85,7 +84,7 @@ public class SysMenu extends Model<SysMenu> {
 	 * 排序值
 	 */
 	@ApiModelProperty(value = "排序值")
-	private Integer sort;
+	private Integer sortOrder;
 
 	/**
 	 * 菜单类型 （0菜单 1按钮）
@@ -98,18 +97,6 @@ public class SysMenu extends Model<SysMenu> {
 	 */
 	@ApiModelProperty(value = "路由缓冲")
 	private String keepAlive;
-
-	/**
-	 * 创建时间
-	 */
-	@ApiModelProperty(value = "创建时间")
-	private LocalDateTime createTime;
-
-	/**
-	 * 更新时间
-	 */
-	@ApiModelProperty(value = "更新时间")
-	private LocalDateTime updateTime;
 
 	/**
 	 * 0--正常 1--删除

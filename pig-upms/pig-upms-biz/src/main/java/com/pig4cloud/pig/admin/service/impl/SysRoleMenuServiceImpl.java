@@ -25,12 +25,12 @@ import com.pig4cloud.pig.admin.service.SysRoleMenuService;
 import com.pig4cloud.pig.common.core.constant.CacheConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -55,22 +55,23 @@ public class SysRoleMenuServiceImpl extends ServiceImpl<SysRoleMenuMapper, SysRo
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	@CacheEvict(value = CacheConstants.MENU_DETAILS, key = "#roleId + '_menu'")
-	public Boolean saveRoleMenus(String role, Integer roleId, String menuIds) {
+	public Boolean saveRoleMenus(String role, Long roleId, String menuIds) {
 		this.remove(Wrappers.<SysRoleMenu>query().lambda().eq(SysRoleMenu::getRoleId, roleId));
 
 		if (StrUtil.isBlank(menuIds)) {
 			return Boolean.TRUE;
 		}
-		List<SysRoleMenu> roleMenuList = Arrays.stream(menuIds.split(",")).map(menuId -> {
+		List<SysRoleMenu> roleMenuList = Arrays.stream(menuIds.split(StrUtil.COMMA)).map(menuId -> {
 			SysRoleMenu roleMenu = new SysRoleMenu();
 			roleMenu.setRoleId(roleId);
-			roleMenu.setMenuId(Integer.valueOf(menuId));
+			roleMenu.setMenuId(Long.valueOf(menuId));
 			return roleMenu;
 		}).collect(Collectors.toList());
 
 		// 清空userinfo
-		cacheManager.getCache(CacheConstants.USER_DETAILS).clear();
+		Objects.requireNonNull(cacheManager.getCache(CacheConstants.USER_DETAILS)).clear();
+		// 清空全部的菜单缓存 fix #I4BM58
+		Objects.requireNonNull(cacheManager.getCache(CacheConstants.MENU_DETAILS)).clear();
 		return this.saveBatch(roleMenuList);
 	}
 

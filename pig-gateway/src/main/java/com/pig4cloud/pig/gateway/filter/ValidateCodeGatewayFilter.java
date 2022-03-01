@@ -17,6 +17,7 @@
 package com.pig4cloud.pig.gateway.filter;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,7 +68,7 @@ public class ValidateCodeGatewayFilter extends AbstractGatewayFilterFactory<Obje
 				return chain.filter(exchange);
 			}
 
-			// 刷新token，直接向下执行
+			// 刷新token，手机号登录（也可以这里进行校验） 直接向下执行
 			String grantType = request.getQueryParams().getFirst("grant_type");
 			if (StrUtil.equals(SecurityConstants.REFRESH_TOKEN, grantType)) {
 				return chain.filter(exchange);
@@ -118,23 +119,14 @@ public class ValidateCodeGatewayFilter extends AbstractGatewayFilterFactory<Obje
 		}
 
 		String key = CacheConstants.DEFAULT_CODE_KEY + randomStr;
-		if (Boolean.FALSE.equals(redisTemplate.hasKey(key))) {
-			throw new ValidateCodeException("验证码不合法");
-		}
 
 		Object codeObj = redisTemplate.opsForValue().get(key);
 
-		if (codeObj == null) {
-			throw new ValidateCodeException("验证码不合法");
-		}
-
-		String saveCode = codeObj.toString();
-		if (CharSequenceUtil.isBlank(saveCode)) {
-			redisTemplate.delete(key);
-			throw new ValidateCodeException("验证码不合法");
-		}
-
 		redisTemplate.delete(key);
+
+		if (ObjectUtil.isEmpty(codeObj) || !code.equals(codeObj)) {
+			throw new ValidateCodeException("验证码不合法");
+		}
 	}
 
 }

@@ -15,14 +15,13 @@
  */
 package com.pig4cloud.pig.codegen.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.pig4cloud.pig.common.mybatis.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.time.LocalDateTime;
 
 /**
  * 数据源表
@@ -33,15 +32,13 @@ import java.time.LocalDateTime;
 @Data
 @TableName("gen_datasource_conf")
 @EqualsAndHashCode(callSuper = true)
-public class GenDatasourceConf extends Model<GenDatasourceConf> {
-
-	private static final long serialVersionUID = 1L;
+public class GenDatasourceConf extends BaseEntity {
 
 	/**
 	 * 主键
 	 */
-	@TableId
-	private Integer id;
+	@TableId(type = IdType.ASSIGN_ID)
+	private Long id;
 
 	/**
 	 * 名称
@@ -62,16 +59,6 @@ public class GenDatasourceConf extends Model<GenDatasourceConf> {
 	 * 密码
 	 */
 	private String password;
-
-	/**
-	 * 创建时间
-	 */
-	private LocalDateTime createDate;
-
-	/**
-	 * 更新
-	 */
-	private LocalDateTime updateDate;
 
 	/**
 	 * 删除标记

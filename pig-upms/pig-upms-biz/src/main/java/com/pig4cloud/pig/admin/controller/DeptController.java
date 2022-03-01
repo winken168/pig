@@ -15,18 +15,20 @@
  */
 package com.pig4cloud.pig.admin.controller;
 
+import cn.hutool.core.lang.tree.Tree;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pig4cloud.pig.admin.api.entity.SysDept;
 import com.pig4cloud.pig.admin.service.SysDeptService;
 import com.pig4cloud.pig.common.core.util.R;
 import com.pig4cloud.pig.common.log.annotation.SysLog;
+import com.pig4cloud.pig.common.security.annotation.Inner;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -49,8 +51,8 @@ public class DeptController {
 	 * @param id ID
 	 * @return SysDept
 	 */
-	@GetMapping("/{id}")
-	public R getById(@PathVariable Integer id) {
+	@GetMapping("/{id:\\d+}")
+	public R<SysDept> getById(@PathVariable Long id) {
 		return R.ok(sysDeptService.getById(id));
 	}
 
@@ -59,7 +61,7 @@ public class DeptController {
 	 * @return 树形菜单
 	 */
 	@GetMapping(value = "/tree")
-	public R listDeptTrees() {
+	public R<List<Tree<Long>>> listDeptTrees() {
 		return R.ok(sysDeptService.listDeptTrees());
 	}
 
@@ -68,7 +70,7 @@ public class DeptController {
 	 * @return 树形菜单
 	 */
 	@GetMapping(value = "/user-tree")
-	public R listCurrentUserDeptTrees() {
+	public R<List<Tree<Long>>> listCurrentUserDeptTrees() {
 		return R.ok(sysDeptService.listCurrentUserDeptTrees());
 	}
 
@@ -80,7 +82,7 @@ public class DeptController {
 	@SysLog("添加部门")
 	@PostMapping
 	@PreAuthorize("@pms.hasPermission('sys_dept_add')")
-	public R save(@Valid @RequestBody SysDept sysDept) {
+	public R<Boolean> save(@Valid @RequestBody SysDept sysDept) {
 		return R.ok(sysDeptService.saveDept(sysDept));
 	}
 
@@ -90,9 +92,9 @@ public class DeptController {
 	 * @return success/false
 	 */
 	@SysLog("删除部门")
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/{id:\\d+}")
 	@PreAuthorize("@pms.hasPermission('sys_dept_del')")
-	public R removeById(@PathVariable Integer id) {
+	public R<Boolean> removeById(@PathVariable Long id) {
 		return R.ok(sysDeptService.removeDeptById(id));
 	}
 
@@ -104,8 +106,7 @@ public class DeptController {
 	@SysLog("编辑部门")
 	@PutMapping
 	@PreAuthorize("@pms.hasPermission('sys_dept_edit')")
-	public R update(@Valid @RequestBody SysDept sysDept) {
-		sysDept.setUpdateTime(LocalDateTime.now());
+	public R<Boolean> update(@Valid @RequestBody SysDept sysDept) {
 		return R.ok(sysDeptService.updateDeptById(sysDept));
 	}
 
@@ -115,10 +116,20 @@ public class DeptController {
 	 * @return
 	 */
 	@GetMapping("/details/{deptname}")
-	public R user(@PathVariable String deptname) {
+	public R<SysDept> user(@PathVariable String deptname) {
 		SysDept condition = new SysDept();
 		condition.setName(deptname);
 		return R.ok(sysDeptService.getOne(new QueryWrapper<>(condition)));
+	}
+
+	/**
+	 * 查收子级id列表
+	 * @return 返回子级id列表
+	 */
+	@Inner
+	@GetMapping(value = "/child-id/{deptId:\\d+}")
+	public R<List<Long>> listChildDeptId(@PathVariable Long deptId) {
+		return R.ok(sysDeptService.listChildDeptId(deptId));
 	}
 
 }

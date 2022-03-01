@@ -28,13 +28,7 @@ import com.pig4cloud.pig.common.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
-import org.springframework.data.redis.core.ConvertingCursor;
-import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.event.LogoutSuccessEvent;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -49,9 +43,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author lengleng
@@ -160,49 +155,14 @@ public class PigTokenEndpoint {
 	public R<Page> tokenList(@RequestBody Map<String, Object> params) {
 		// 根据分页参数获取对应数据
 		String key = String.format("%sauth_to_access:*", CacheConstants.PROJECT_OAUTH_ACCESS);
-		List<String> pages = findKeysForPage(key, MapUtil.getInt(params, CommonConstants.CURRENT),
-				MapUtil.getInt(params, CommonConstants.SIZE));
-
-		redisTemplate.setKeySerializer(new StringRedisSerializer());
-		redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());
-		Page result = new Page(MapUtil.getInt(params, CommonConstants.CURRENT),
-				MapUtil.getInt(params, CommonConstants.SIZE));
+		int current = MapUtil.getInt(params, CommonConstants.CURRENT);
+		int size = MapUtil.getInt(params, CommonConstants.SIZE);
+		Set<String> keys = redisTemplate.keys(key);
+		List<String> pages = keys.stream().skip((current - 1) * size).limit(size).collect(Collectors.toList());
+		Page result = new Page(current, size);
 		result.setRecords(redisTemplate.opsForValue().multiGet(pages));
-		result.setTotal(redisTemplate.keys(key).size());
+		result.setTotal(keys.size());
 		return R.ok(result);
-	}
-
-	private List<String> findKeysForPage(String patternKey, int pageNum, int pageSize) {
-		ScanOptions options = ScanOptions.scanOptions().count(1000L).match(patternKey).build();
-		RedisSerializer<String> redisSerializer = (RedisSerializer<String>) redisTemplate.getKeySerializer();
-		Cursor cursor = (Cursor) redisTemplate.executeWithStickyConnection(
-				redisConnection -> new ConvertingCursor<>(redisConnection.scan(options), redisSerializer::deserialize));
-		List<String> result = new ArrayList<>();
-		int tmpIndex = 0;
-		int startIndex = (pageNum - 1) * pageSize;
-		int end = pageNum * pageSize;
-
-		assert cursor != null;
-		while (cursor.hasNext()) {
-			if (tmpIndex >= startIndex && tmpIndex < end) {
-				result.add(cursor.next().toString());
-				tmpIndex++;
-				continue;
-			}
-			if (tmpIndex >= end) {
-				break;
-			}
-			tmpIndex++;
-			cursor.next();
-		}
-
-		try {
-			cursor.close();
-		}
-		catch (Exception e) {
-			log.error("关闭cursor 失败");
-		}
-		return result;
 	}
 
 }

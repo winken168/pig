@@ -20,6 +20,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeNode;
 import cn.hutool.core.lang.tree.TreeUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pig4cloud.pig.admin.api.entity.SysMenu;
@@ -61,7 +62,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
 	@Override
 	@Cacheable(value = CacheConstants.MENU_DETAILS, key = "#roleId  + '_menu'", unless = "#result == null")
-	public List<SysMenu> findMenuByRoleId(Integer roleId) {
+	public Set<SysMenu> findMenuByRoleId(Long roleId) {
 		return baseMapper.listMenusByRoleId(roleId);
 	}
 
@@ -73,7 +74,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	@CacheEvict(value = CacheConstants.MENU_DETAILS, allEntries = true)
-	public Boolean removeMenuById(Integer id) {
+	public Boolean removeMenuById(Long id) {
 		// 查询父节点为当前节点的节点
 		List<SysMenu> menuList = this.list(Wrappers.<SysMenu>query().lambda().eq(SysMenu::getParentId, id));
 
@@ -97,20 +98,20 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 	 * @return
 	 */
 	@Override
-	public List<Tree<Integer>> treeMenu(boolean lazy, Integer parentId) {
+	public List<Tree<Long>> treeMenu(boolean lazy, Long parentId) {
 		if (!lazy) {
-			List<TreeNode<Integer>> collect = baseMapper
-					.selectList(Wrappers.<SysMenu>lambdaQuery().orderByAsc(SysMenu::getSort)).stream()
+			List<TreeNode<Long>> collect = baseMapper
+					.selectList(Wrappers.<SysMenu>lambdaQuery().orderByAsc(SysMenu::getSortOrder)).stream()
 					.map(getNodeFunction()).collect(Collectors.toList());
 
 			return TreeUtil.build(collect, CommonConstants.MENU_TREE_ROOT_ID);
 		}
 
-		Integer parent = parentId == null ? CommonConstants.MENU_TREE_ROOT_ID : parentId;
+		Long parent = parentId == null ? CommonConstants.MENU_TREE_ROOT_ID : parentId;
 
-		List<TreeNode<Integer>> collect = baseMapper
-				.selectList(
-						Wrappers.<SysMenu>lambdaQuery().eq(SysMenu::getParentId, parent).orderByAsc(SysMenu::getSort))
+		List<TreeNode<Long>> collect = baseMapper
+				.selectList(Wrappers.<SysMenu>lambdaQuery().eq(SysMenu::getParentId, parent)
+						.orderByAsc(SysMenu::getSortOrder))
 				.stream().map(getNodeFunction()).collect(Collectors.toList());
 
 		return TreeUtil.build(collect, parent);
@@ -123,22 +124,28 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 	 * @return
 	 */
 	@Override
-	public List<Tree<Integer>> filterMenu(Set<SysMenu> all, Integer parentId) {
-		List<TreeNode<Integer>> collect = all.stream()
-				.filter(menu -> MenuTypeEnum.LEFT_MENU.getType().equals(menu.getType())).map(getNodeFunction())
-				.collect(Collectors.toList());
-		Integer parent = parentId == null ? CommonConstants.MENU_TREE_ROOT_ID : parentId;
+	public List<Tree<Long>> filterMenu(Set<SysMenu> all, Long parentId) {
+		List<TreeNode<Long>> collect = all.stream()
+				.filter(menu -> MenuTypeEnum.LEFT_MENU.getType().equals(menu.getType()))
+				.filter(menu -> StrUtil.isNotBlank(menu.getPath())).map(getNodeFunction()).collect(Collectors.toList());
+		Long parent = parentId == null ? CommonConstants.MENU_TREE_ROOT_ID : parentId;
 		return TreeUtil.build(collect, parent);
 	}
 
+	@Override
+	@CacheEvict(value = CacheConstants.MENU_DETAILS, allEntries = true)
+	public void clearMenuCache() {
+
+	}
+
 	@NotNull
-	private Function<SysMenu, TreeNode<Integer>> getNodeFunction() {
+	private Function<SysMenu, TreeNode<Long>> getNodeFunction() {
 		return menu -> {
-			TreeNode<Integer> node = new TreeNode<>();
+			TreeNode<Long> node = new TreeNode<>();
 			node.setId(menu.getMenuId());
 			node.setName(menu.getName());
 			node.setParentId(menu.getParentId());
-			node.setWeight(menu.getSort());
+			node.setWeight(menu.getSortOrder());
 			// 扩展属性
 			Map<String, Object> extra = new HashMap<>();
 			extra.put("icon", menu.getIcon());
@@ -146,7 +153,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 			extra.put("type", menu.getType());
 			extra.put("permission", menu.getPermission());
 			extra.put("label", menu.getName());
-			extra.put("sort", menu.getSort());
+			extra.put("sortOrder", menu.getSortOrder());
 			extra.put("keepAlive", menu.getKeepAlive());
 			node.setExtra(extra);
 			return node;

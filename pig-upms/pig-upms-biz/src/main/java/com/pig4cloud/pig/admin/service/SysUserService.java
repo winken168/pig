@@ -22,10 +22,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.pig4cloud.pig.admin.api.dto.UserDTO;
 import com.pig4cloud.pig.admin.api.dto.UserInfo;
 import com.pig4cloud.pig.admin.api.entity.SysUser;
+import com.pig4cloud.pig.admin.api.vo.UserExcelVO;
 import com.pig4cloud.pig.admin.api.vo.UserVO;
 import com.pig4cloud.pig.common.core.util.R;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author lengleng
@@ -46,7 +49,7 @@ public interface SysUserService extends IService<SysUser> {
 	 * @param userDTO 参数列表
 	 * @return
 	 */
-	IPage getUserWithRolePage(Page page, UserDTO userDTO);
+	IPage<List<UserVO>> getUserWithRolePage(Page page, UserDTO userDTO);
 
 	/**
 	 * 删除用户
@@ -74,7 +77,7 @@ public interface SysUserService extends IService<SysUser> {
 	 * @param id 用户ID
 	 * @return 用户信息
 	 */
-	UserVO getUserVoById(Integer id);
+	UserVO getUserVoById(Long id);
 
 	/**
 	 * 查询上级部门的用户信息
@@ -89,5 +92,27 @@ public interface SysUserService extends IService<SysUser> {
 	 * @return success/fail
 	 */
 	Boolean saveUser(UserDTO userDto);
+
+	/**
+	 * 查询全部的用户
+	 * @param userDTO 查询条件
+	 * @return list
+	 */
+	List<UserExcelVO> listUser(UserDTO userDTO);
+
+	/**
+	 * excel 导入用户
+	 * @param excelVOList excel 列表数据
+	 * @param bindingResult 错误数据
+	 * @return ok fail
+	 */
+	R importUser(List<UserExcelVO> excelVOList, BindingResult bindingResult);
+
+	/**
+	 * 根据部门 id 列表查询对应的用户 id 集合
+	 * @param deptIds 部门 id 列表
+	 * @return userIdList
+	 */
+	List<Long> listUserIdByDeptIds(Set<Long> deptIds);
 
 }

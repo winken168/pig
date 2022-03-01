@@ -34,6 +34,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * <p>
@@ -58,8 +59,8 @@ public class DictController {
 	 * @param id ID
 	 * @return 字典信息
 	 */
-	@GetMapping("/{id}")
-	public R getById(@PathVariable Integer id) {
+	@GetMapping("/{id:\\d+}")
+	public R<SysDict> getById(@PathVariable Long id) {
 		return R.ok(sysDictService.getById(id));
 	}
 
@@ -69,7 +70,7 @@ public class DictController {
 	 * @return 分页对象
 	 */
 	@GetMapping("/page")
-	public R<IPage> getDictPage(Page page, SysDict sysDict) {
+	public R<IPage<SysDict>> getDictPage(Page page, SysDict sysDict) {
 		return R.ok(sysDictService.page(page, Wrappers.query(sysDict)));
 	}
 
@@ -80,7 +81,7 @@ public class DictController {
 	 */
 	@GetMapping("/type/{type}")
 	@Cacheable(value = CacheConstants.DICT_DETAILS, key = "#type")
-	public R getDictByType(@PathVariable String type) {
+	public R<List<SysDictItem>> getDictByType(@PathVariable String type) {
 		return R.ok(sysDictItemService.list(Wrappers.<SysDictItem>query().lambda().eq(SysDictItem::getType, type)));
 	}
 
@@ -92,7 +93,7 @@ public class DictController {
 	@SysLog("添加字典")
 	@PostMapping
 	@PreAuthorize("@pms.hasPermission('sys_dict_add')")
-	public R save(@Valid @RequestBody SysDict sysDict) {
+	public R<Boolean> save(@Valid @RequestBody SysDict sysDict) {
 		return R.ok(sysDictService.save(sysDict));
 	}
 
@@ -102,9 +103,9 @@ public class DictController {
 	 * @return R
 	 */
 	@SysLog("删除字典")
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/{id:\\d+}")
 	@PreAuthorize("@pms.hasPermission('sys_dict_del')")
-	public R removeById(@PathVariable Integer id) {
+	public R removeById(@PathVariable Long id) {
 		sysDictService.removeDict(id);
 		return R.ok();
 	}
@@ -129,7 +130,7 @@ public class DictController {
 	 * @return
 	 */
 	@GetMapping("/item/page")
-	public R getSysDictItemPage(Page page, SysDictItem sysDictItem) {
+	public R<IPage<SysDictItem>> getSysDictItemPage(Page page, SysDictItem sysDictItem) {
 		return R.ok(sysDictItemService.page(page, Wrappers.query(sysDictItem)));
 	}
 
@@ -138,8 +139,8 @@ public class DictController {
 	 * @param id id
 	 * @return R
 	 */
-	@GetMapping("/item/{id}")
-	public R getDictItemById(@PathVariable("id") Integer id) {
+	@GetMapping("/item/{id:\\d+}")
+	public R<SysDictItem> getDictItemById(@PathVariable("id") Long id) {
 		return R.ok(sysDictItemService.getById(id));
 	}
 
@@ -151,7 +152,7 @@ public class DictController {
 	@SysLog("新增字典项")
 	@PostMapping("/item")
 	@CacheEvict(value = CacheConstants.DICT_DETAILS, allEntries = true)
-	public R save(@RequestBody SysDictItem sysDictItem) {
+	public R<Boolean> save(@RequestBody SysDictItem sysDictItem) {
 		return R.ok(sysDictItemService.save(sysDictItem));
 	}
 
@@ -163,7 +164,8 @@ public class DictController {
 	@SysLog("修改字典项")
 	@PutMapping("/item")
 	public R updateById(@RequestBody SysDictItem sysDictItem) {
-		return sysDictItemService.updateDictItem(sysDictItem);
+		sysDictItemService.updateDictItem(sysDictItem);
+		return R.ok();
 	}
 
 	/**
@@ -172,9 +174,18 @@ public class DictController {
 	 * @return R
 	 */
 	@SysLog("删除字典项")
-	@DeleteMapping("/item/{id}")
-	public R removeDictItemById(@PathVariable Integer id) {
-		return sysDictItemService.removeDictItem(id);
+	@DeleteMapping("/item/{id:\\d+}")
+	public R removeDictItemById(@PathVariable Long id) {
+		sysDictItemService.removeDictItem(id);
+		return R.ok();
+	}
+
+	@SysLog("清除字典缓存")
+	@DeleteMapping("/cache")
+	@PreAuthorize("@pms.hasPermission('sys_dict_del')")
+	public R clearDictCache() {
+		sysDictService.clearDictCache();
+		return R.ok();
 	}
 
 }

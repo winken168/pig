@@ -53,8 +53,6 @@ public class SysDeptRelationServiceImpl extends ServiceImpl<SysDeptRelationMappe
 	@Transactional(rollbackFor = Exception.class)
 	public void saveDeptRelation(SysDept sysDept) {
 		// 增加部门关系表
-		SysDeptRelation condition = new SysDeptRelation();
-		condition.setDescendant(sysDept.getParentId());
 		List<SysDeptRelation> relationList = sysDeptRelationMapper.selectList(
 				Wrappers.<SysDeptRelation>query().lambda().eq(SysDeptRelation::getDescendant, sysDept.getParentId()))
 				.stream().map(relation -> {
@@ -77,7 +75,7 @@ public class SysDeptRelationServiceImpl extends ServiceImpl<SysDeptRelationMappe
 	 * @param id
 	 */
 	@Override
-	public void removeDeptRelationById(Integer id) {
+	public void removeDeptRelationById(Long id) {
 		baseMapper.deleteDeptRelationsById(id);
 	}
 
@@ -86,8 +84,10 @@ public class SysDeptRelationServiceImpl extends ServiceImpl<SysDeptRelationMappe
 	 * @param relation
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void updateDeptRelation(SysDeptRelation relation) {
-		baseMapper.updateDeptRelations(relation);
+		baseMapper.deleteDeptRelations(relation);
+		baseMapper.insertDeptRelations(relation);
 	}
 
 }

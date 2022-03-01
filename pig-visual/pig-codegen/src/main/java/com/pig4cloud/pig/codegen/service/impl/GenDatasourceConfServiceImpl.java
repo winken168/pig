@@ -24,7 +24,6 @@ import com.pig4cloud.pig.codegen.entity.GenDatasourceConf;
 import com.pig4cloud.pig.codegen.mapper.GenDatasourceConfMapper;
 import com.pig4cloud.pig.codegen.service.GenDatasourceConfService;
 import com.pig4cloud.pig.common.core.util.SpringContextHolder;
-import com.pig4cloud.pig.common.datasource.support.DataSourceConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jasypt.encryption.StringEncryptor;
@@ -102,7 +101,7 @@ public class GenDatasourceConfServiceImpl extends ServiceImpl<GenDatasourceConfM
 	 * @return
 	 */
 	@Override
-	public Boolean removeByDsId(Integer dsId) {
+	public Boolean removeByDsId(Long dsId) {
 		SpringContextHolder.getBean(DynamicRoutingDataSource.class)
 				.removeDataSource(baseMapper.selectById(dsId).getName());
 		this.baseMapper.deleteById(dsId);
@@ -120,7 +119,6 @@ public class GenDatasourceConfServiceImpl extends ServiceImpl<GenDatasourceConfM
 		dataSourceProperty.setUrl(conf.getUrl());
 		dataSourceProperty.setUsername(conf.getUsername());
 		dataSourceProperty.setPassword(conf.getPassword());
-		dataSourceProperty.setDriverClassName(DataSourceConstants.DS_DRIVER);
 		dataSourceProperty.setLazy(true);
 		DataSource dataSource = hikariDataSourceCreator.createDataSource(dataSourceProperty);
 		SpringContextHolder.getBean(DynamicRoutingDataSource.class).addDataSource(dataSourceProperty.getPoolName(),

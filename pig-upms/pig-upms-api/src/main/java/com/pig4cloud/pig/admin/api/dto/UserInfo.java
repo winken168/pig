@@ -16,10 +16,12 @@
 
 package com.pig4cloud.pig.admin.api.dto;
 
+import com.pig4cloud.pig.admin.api.entity.SysRole;
 import com.pig4cloud.pig.admin.api.entity.SysUser;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author lengleng
@@ -44,6 +46,11 @@ public class UserInfo implements Serializable {
 	/**
 	 * 角色集合
 	 */
-	private Integer[] roles;
+	private Long[] roles;
+
+	/**
+	 * 角色集合
+	 */
+	private List<SysRole> roleList;
 
 }

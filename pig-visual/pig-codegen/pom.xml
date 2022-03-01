@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>com.pig4cloud</groupId>
 		<artifactId>pig-visual</artifactId>
-		<version>3.2.2</version>
+		<version>3.4.5</version>
 	</parent>
 
 	<artifactId>pig-codegen</artifactId>
@@ -82,9 +82,14 @@
 		</dependency>
 		<!--代码生成模板引擎-->
 		<dependency>
-			<artifactId>velocity</artifactId>
 			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity-engine-core</artifactId>
 			<version>${velocity.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.velocity.tools</groupId>
+			<artifactId>velocity-tools-generic</artifactId>
+			<version>${velocity.tool.version}</version>
 		</dependency>
 		<!--undertow容器-->
 		<dependency>

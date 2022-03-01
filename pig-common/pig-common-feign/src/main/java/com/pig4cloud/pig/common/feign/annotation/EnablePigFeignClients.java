@@ -16,13 +16,12 @@
 
 package com.pig4cloud.pig.common.feign.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.cloud.openfeign.FeignClientsConfiguration;
+import org.springframework.cloud.openfeign.PigFeignClientsRegistrar;
+import org.springframework.context.annotation.Import;
+
+import java.lang.annotation.*;
 
 /**
  * @author lengleng
@@ -32,6 +31,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @EnableFeignClients
+@Import(PigFeignClientsRegistrar.class)
 public @interface EnablePigFeignClients {
 
 	/**

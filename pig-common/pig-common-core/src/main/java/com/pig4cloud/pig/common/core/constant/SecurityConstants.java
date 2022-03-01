@@ -58,6 +58,11 @@ public interface SecurityConstants {
 	String REFRESH_TOKEN = "refresh_token";
 
 	/**
+	 * 手机号登录
+	 */
+	String APP = "app";
+
+	/**
 	 * {bcrypt} 加密的特征码
 	 */
 	String BCRYPT = "{bcrypt}";
@@ -90,19 +95,9 @@ public interface SecurityConstants {
 	String RESOURCE_SERVER_CONFIGURER = "resourceServerConfigurerAdapter";
 
 	/**
-	 * 用户ID字段
+	 * 用户信息
 	 */
-	String DETAILS_USER_ID = "user_id";
-
-	/**
-	 * 用户名字段
-	 */
-	String DETAILS_USERNAME = "username";
-
-	/**
-	 * 用户部门字段
-	 */
-	String DETAILS_DEPT_ID = "dept_id";
+	String DETAILS_USER = "user_info";
 
 	/**
 	 * 协议字段
@@ -113,5 +108,20 @@ public interface SecurityConstants {
 	 * 验证码有效期,默认 60秒
 	 */
 	long CODE_TIME = 60;
+
+	/**
+	 * 验证码长度
+	 */
+	String CODE_SIZE = "6";
+
+	/**
+	 * 客户端模式
+	 */
+	String CLIENT_CREDENTIALS = "client_credentials";
+
+	/**
+	 * 客户端ID
+	 */
+	String CLIENT_ID = "clientId";
 
 }

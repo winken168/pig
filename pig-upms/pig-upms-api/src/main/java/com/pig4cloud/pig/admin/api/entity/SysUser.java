@@ -20,11 +20,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.pig4cloud.pig.common.mybatis.base.BaseEntity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
  * <p>
@@ -35,16 +34,17 @@ import java.time.LocalDateTime;
  * @since 2019/2/1
  */
 @Data
-public class SysUser implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class SysUser extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 主键ID
 	 */
-	@TableId(value = "user_id", type = IdType.AUTO)
+	@TableId(value = "user_id", type = IdType.ASSIGN_ID)
 	@ApiModelProperty(value = "主键id")
-	private Integer userId;
+	private Long userId;
 
 	/**
 	 * 用户名
@@ -64,18 +64,6 @@ public class SysUser implements Serializable {
 	@JsonIgnore
 	@ApiModelProperty(value = "随机盐")
 	private String salt;
-
-	/**
-	 * 创建时间
-	 */
-	@ApiModelProperty(value = "创建时间")
-	private LocalDateTime createTime;
-
-	/**
-	 * 修改时间
-	 */
-	@ApiModelProperty(value = "修改时间")
-	private LocalDateTime updateTime;
 
 	/**
 	 * 锁定标记
@@ -99,7 +87,7 @@ public class SysUser implements Serializable {
 	 * 部门ID
 	 */
 	@ApiModelProperty(value = "用户所属部门id")
-	private Integer deptId;
+	private Long deptId;
 
 	/**
 	 * 0-正常，1-删除

@@ -15,16 +15,14 @@
  */
 package com.pig4cloud.pig.admin.api.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.extension.activerecord.Model;
+import com.pig4cloud.pig.common.mybatis.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.time.LocalDateTime;
 
 /**
  * 字典表
@@ -35,16 +33,16 @@ import java.time.LocalDateTime;
 @Data
 @ApiModel(value = "字典类型")
 @EqualsAndHashCode(callSuper = true)
-public class SysDict extends Model<SysDict> {
+public class SysDict extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 编号
 	 */
-	@TableId
+	@TableId(type = IdType.ASSIGN_ID)
 	@ApiModelProperty(value = "字典编号")
-	private Integer id;
+	private Long id;
 
 	/**
 	 * 类型
@@ -59,29 +57,16 @@ public class SysDict extends Model<SysDict> {
 	private String description;
 
 	/**
-	 * 创建时间
-	 */
-	@ApiModelProperty(value = "创建时间")
-	private LocalDateTime createTime;
-
-	/**
-	 * 更新时间
-	 */
-	@ApiModelProperty(value = "更新时间")
-	private LocalDateTime updateTime;
-
-	/**
 	 * 是否是系统内置
 	 */
-	@TableField(value = "`system`")
 	@ApiModelProperty(value = "是否系统内置")
-	private String system;
+	private String systemFlag;
 
 	/**
 	 * 备注信息
 	 */
 	@ApiModelProperty(value = "备注信息")
-	private String remarks;
+	private String remark;
 
 	/**
 	 * 删除标记

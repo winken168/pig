@@ -18,6 +18,7 @@ package com.pig4cloud.pig.common.core.util;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.json.JSONUtil;
+import com.pig4cloud.pig.common.core.constant.CommonConstants;
 import com.pig4cloud.pig.common.core.exception.CheckedException;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
@@ -25,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -37,8 +37,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 /**
  * Miscellaneous utilities for web applications.
@@ -69,9 +69,10 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
 	 * @return cookie value
 	 */
 	public String getCookieVal(String name) {
-		HttpServletRequest request = WebUtils.getRequest();
-		Assert.notNull(request, "request from RequestContextHolder is null");
-		return getCookieVal(request, name);
+		if (WebUtils.getRequest().isPresent()) {
+			return getCookieVal(WebUtils.getRequest().get(), name);
+		}
+		return null;
 	}
 
 	/**
@@ -113,8 +114,9 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
 	 * 获取 HttpServletRequest
 	 * @return {HttpServletRequest}
 	 */
-	public HttpServletRequest getRequest() {
-		return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+	public Optional<HttpServletRequest> getRequest() {
+		return Optional
+				.ofNullable(((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
 	}
 
 	/**
@@ -141,7 +143,7 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
 	 * @param contentType contentType
 	 */
 	public void renderJson(HttpServletResponse response, Object result, String contentType) {
-		response.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding(CommonConstants.UTF8);
 		response.setContentType(contentType);
 		try (PrintWriter out = response.getWriter()) {
 			out.append(JSONUtil.toJsonStr(result));
@@ -158,19 +160,20 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
 	@SneakyThrows
 	public String getClientId(ServerHttpRequest request) {
 		String header = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-
 		return splitClient(header)[0];
 	}
 
 	@SneakyThrows
-	public String getClientId(HttpServletRequest request) {
-		String header = WebUtils.getRequest().getHeader("Authorization");
-
-		return splitClient(header)[0];
+	public String getClientId() {
+		if (WebUtils.getRequest().isPresent()) {
+			String header = WebUtils.getRequest().get().getHeader(HttpHeaders.AUTHORIZATION);
+			return splitClient(header)[0];
+		}
+		return null;
 	}
 
 	@NotNull
-	private static String[] splitClient(String header) throws UnsupportedEncodingException {
+	private static String[] splitClient(String header) {
 		if (header == null || !header.startsWith(BASIC_)) {
 			throw new CheckedException("请求头中client信息为空");
 		}
